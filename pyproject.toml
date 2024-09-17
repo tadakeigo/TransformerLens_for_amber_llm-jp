@@ -2,7 +2,7 @@
     authors=["Neel Nanda <77788841+TransformerLensOrg@users.noreply.github.com>"]
     description="An implementation of transformers tailored for mechanistic interpretability."
     license="MIT"
-    name="transformerlens_for_amber_llm-jp"
+    name="transformerlens_for_amber_llm_jp"
     packages=[{include="transformer_lens"}]
     readme="README.md"
     # Version is automatically set by the pipeline on release
