@@ -2,7 +2,7 @@
     authors=["Neel Nanda <77788841+TransformerLensOrg@users.noreply.github.com>"]
     description="An implementation of transformers tailored for mechanistic interpretability."
     license="MIT"
-    name="transformer-lens"
+    name="TransformerLens_for_amber_llm-jp"
     packages=[{include="transformer_lens"}]
     readme="README.md"
     # Version is automatically set by the pipeline on release
@@ -129,10 +129,7 @@
     # All rules apart from base are shown explicitly below
     deprecateTypingAliases=true
     disableBytesTypePromotions=true
-    exclude = [
-        "*/**/*.py",
-        "!/transformer_lens/hook_points.py"
-    ]
+    exclude=["!/transformer_lens/hook_points.py", "*/**/*.py"]
     reportAssertAlwaysTrue=true
     reportConstantRedefinition=true
     reportDeprecated=true
@@ -188,4 +185,3 @@
     strictListInference=true
     strictParameterNoneValue=true
     strictSetInference=true
-    
