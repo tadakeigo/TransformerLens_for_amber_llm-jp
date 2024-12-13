@@ -1364,7 +1364,7 @@ def convert_hf_model_config(model_name: str, **kwargs):
             "gated_mlp": True,
             "use_normalization_before_and_after": True,
         }
-    elif architecture == "OlmoForCausalLM":
+    elif architecture == "OlmoForCausalLM" or architecture == "OLMoForCausalLM":
         cfg_dict = {
             "d_model": hf_config.hidden_size,
             "d_head": hf_config.hidden_size // hf_config.num_attention_heads,
@@ -1850,7 +1850,7 @@ def get_pretrained_state_dict(
             state_dict = convert_gemma_weights(hf_model, cfg)
         elif cfg.original_architecture == "Olmo2ForCausalLM":
             state_dict = convert_olmo2_weights(hf_model, cfg)
-        elif cfg.original_architecture == "OlmoForCausalLM":
+        elif cfg.original_architecture == "OlmoForCausalLM" or cfg.original_architecture == "OLMoForCausalLM":
             state_dict = convert_olmo_weights(hf_model, cfg)
         else:
             raise ValueError(
