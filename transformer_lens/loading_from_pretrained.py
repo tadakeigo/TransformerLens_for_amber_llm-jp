@@ -1755,14 +1755,6 @@ def get_pretrained_state_dict(
                     token=huggingface_token,
                     **kwargs,
                 )
-            elif official_model_name.startswith("allenai/OLMo-7B"):
-                hf_model = AutoModelForCausalLM.from_pretrained(
-                    official_model_name,
-                    revision=f"{cfg.checkpoint_value}",
-                    torch_dtype=dtype,
-                    token=huggingface_token,
-                    **kwargs,
-                )
             elif official_model_name.startswith("allenai/OLMo-7B-0424-hf"):
                 hf_model = AutoModelForCausalLM.from_pretrained(
                     official_model_name,
@@ -1772,6 +1764,14 @@ def get_pretrained_state_dict(
                     **kwargs,
                 )
             elif official_model_name.startswith("allenai/OLMo-7B-0724-hf"):
+                hf_model = AutoModelForCausalLM.from_pretrained(
+                    official_model_name,
+                    revision=f"{cfg.checkpoint_value}",
+                    torch_dtype=dtype,
+                    token=huggingface_token,
+                    **kwargs,
+                )
+            elif official_model_name.startswith("allenai/OLMo-7B"):
                 hf_model = AutoModelForCausalLM.from_pretrained(
                     official_model_name,
                     revision=f"{cfg.checkpoint_value}",
