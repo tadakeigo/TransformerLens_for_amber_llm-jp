@@ -25,7 +25,7 @@ def convert_olmo_weights(olmo, cfg: HookedTransformerConfig):
 
     for l in range(cfg.n_layers):
         state_dict[f"blocks.{l}.ln1.w"] = torch.ones(
-            cfg.d_model, dtype=cfg.dtype, device=cfg.device
+            cfg.d_model, dtype=cfg.dtype
         )
         
         W_Q = olmo.model.layers[l].self_attn.q_proj.weight
@@ -71,7 +71,7 @@ def convert_olmo_weights(olmo, cfg: HookedTransformerConfig):
         )
 
         state_dict[f"blocks.{l}.ln2.w"] = torch.ones(
-            cfg.d_model, dtype=cfg.dtype, device=cfg.device
+            cfg.d_model, dtype=cfg.dtype
         )
         
         # in case of quantization,
@@ -93,7 +93,7 @@ def convert_olmo_weights(olmo, cfg: HookedTransformerConfig):
         )
 
     state_dict["ln_final.w"] = torch.ones(
-            cfg.d_model, dtype=cfg.dtype, device=cfg.device
+            cfg.d_model, dtype=cfg.dtype
     )
 
     state_dict["unembed.W_U"] = olmo.lm_head.weight.T
