@@ -146,7 +146,7 @@ class HookedTransformer(HookedRootModule):
                 self.set_tokenizer(
                     AutoTokenizer.from_pretrained(
                         self.cfg.tokenizer_name,
-                        add_bos_token=True,
+                        # add_bos_token=True,
                         trust_remote_code=self.cfg.trust_remote_code,
                         use_fast=use_fast,
                         token=huggingface_token,
@@ -1624,18 +1624,36 @@ class HookedTransformer(HookedRootModule):
                 )
                 del state_dict[f"blocks.{l}.ln1.b"]
 
-            state_dict[f"blocks.{l}.attn.W_Q"] = (
-                state_dict[f"blocks.{l}.attn.W_Q"] * state_dict[f"blocks.{l}.ln1.w"][None, :, None]
-            )
-            state_dict[f"blocks.{l}.attn.{gqa}W_K"] = (
-                state_dict[f"blocks.{l}.attn.{gqa}W_K"]
-                * state_dict[f"blocks.{l}.ln1.w"][None, :, None]
-            )
-            state_dict[f"blocks.{l}.attn.{gqa}W_V"] = (
-                state_dict[f"blocks.{l}.attn.{gqa}W_V"]
-                * state_dict[f"blocks.{l}.ln1.w"][None, :, None]
-            )
-            del state_dict[f"blocks.{l}.ln1.w"]
+            if self.cfg.original_architecture == "Olmo2ForCausalLM":
+                state_dict[f"blocks.{l}.attn.W_Q"] = (
+                    state_dict[f"blocks.{l}.attn.W_Q"]
+                    * state_dict[f"blocks.{l}.attn.qnorm.w"][None, :, None]
+                )
+                state_dict[f"blocks.{l}.attn.{gqa}W_K"] = (
+                    state_dict[f"blocks.{l}.attn.{gqa}W_K"]
+                    * state_dict[f"blocks.{l}.attn.knorm.w"][None, :, None]
+                )
+                state_dict[f"blocks.{l}.attn.{gqa}W_V"] = (
+                    state_dict[f"blocks.{l}.attn.{gqa}W_V"]
+                )
+                state_dict[f"blocks.{l}.attn.W_O"] = (
+                    state_dict[f"blocks.{l}.attn.W_O"]
+                    * state_dict[f"blocks.{l}.ln1_post.w"][None, None, :]
+                )
+                del state_dict[f"blocks.{l}.attn.qnorm.w"], state_dict[f"blocks.{l}.attn.knorm.w"], state_dict[f"blocks.{l}.ln1_post.w"]
+            else:
+                state_dict[f"blocks.{l}.attn.W_Q"] = (
+                    state_dict[f"blocks.{l}.attn.W_Q"] * state_dict[f"blocks.{l}.ln1.w"][None, :, None]
+                )
+                state_dict[f"blocks.{l}.attn.{gqa}W_K"] = (
+                    state_dict[f"blocks.{l}.attn.{gqa}W_K"]
+                    * state_dict[f"blocks.{l}.ln1.w"][None, :, None]
+                )
+                state_dict[f"blocks.{l}.attn.{gqa}W_V"] = (
+                    state_dict[f"blocks.{l}.attn.{gqa}W_V"]
+                    * state_dict[f"blocks.{l}.ln1.w"][None, :, None]
+                )
+                del state_dict[f"blocks.{l}.ln1.w"]
 
             # Finally, we center the weights reading from the residual stream. The output of the
             # first part of the LayerNorm is mean 0 and standard deviation 1, so the mean of any
@@ -1716,6 +1734,12 @@ class HookedTransformer(HookedRootModule):
                         )
 
                     del state_dict[f"blocks.{l}.mlp.ln.w"]
+                if self.cfg.original_architecture == "Olmo2ForCausalLM":
+                    state_dict[f"blocks.{l}.mlp.W_out"] = (
+                        state_dict[f"blocks.{l}.mlp.W_out"]
+                        * state_dict[f"blocks.{l}.ln2_post.w"][ None,:]
+                    )
+                    del state_dict[f"blocks.{l}.ln2_post.w"]
 
         # Fold ln_final into Unembed
         if not self.cfg.final_rms and fold_biases:

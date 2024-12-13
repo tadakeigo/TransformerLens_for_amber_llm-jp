@@ -18,3 +18,5 @@ from .mingpt import convert_mingpt_weights
 from .nanogpt import convert_nanogpt_weights
 from .t5 import convert_t5_weights
 from .neel_solu_old import convert_neel_solu_old_weights
+from .olmo2 import convert_olmo2_weights
+from .olmo import convert_olmo_weights
