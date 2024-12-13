@@ -16,6 +16,7 @@ from transformer_lens.components import (
     LayerNormPre,
     RMSNorm,
     RMSNormPre,
+    RMSNormPre_identity,
 )
 from transformer_lens.components.mlps.can_be_used_as_mlp import CanBeUsedAsMLP
 from transformer_lens.factories.mlp_factory import MLPFactory
@@ -30,6 +31,8 @@ class TransformerBlock(nn.Module):
     ln1: nn.Module
     ln2: nn.Module
     mlp: CanBeUsedAsMLP
+    qnorm: nn.Module
+    knorm: nn.Module
 
     def __init__(self, cfg: Union[Dict, HookedTransformerConfig], block_index):
         super().__init__()
@@ -65,13 +68,24 @@ class TransformerBlock(nn.Module):
             elif self.normalization_type.startswith("LayerNorm"):
                 normalization_layer_after = LayerNorm
 
-        self.ln1 = normalization_layer(cfg)
-        if self.cfg.use_normalization_before_and_after:
-            self.ln1_post = normalization_layer_after(cfg)
-        if not self.cfg.attn_only:
-            self.ln2 = normalization_layer(cfg)
+        if self.cfg.original_architecture == "Olmo2ForCausalLM":
+            self.qnorm = RMSNorm(cfg)
+            self.knorm = RMSNorm(cfg)
+            # self.ln1 = RMSNormPre_identity(cfg)
             if self.cfg.use_normalization_before_and_after:
-                self.ln2_post = normalization_layer_after(cfg)
+                self.ln1_post = normalization_layer_after(cfg)
+            if not self.cfg.attn_only:
+                self.ln2 = RMSNormPre_identity(cfg)
+                if self.cfg.use_normalization_before_and_after:
+                    self.ln2_post = normalization_layer_after(cfg)
+        else:
+            self.ln1 = normalization_layer(cfg)
+            if self.cfg.use_normalization_before_and_after:
+                self.ln1_post = normalization_layer_after(cfg)
+            if not self.cfg.attn_only:
+                self.ln2 = normalization_layer(cfg)
+                if self.cfg.use_normalization_before_and_after:
+                    self.ln2_post = normalization_layer_after(cfg)
 
         attention = Attention if self.cfg.n_key_value_heads is None else GroupedQueryAttention
         if not self.cfg.use_local_attn:
@@ -152,20 +166,36 @@ class TransformerBlock(nn.Module):
             key_input = attn_in
             value_input = attn_in
 
-        attn_out = (
-            # hook the residual stream states that are used to calculate the
-            # queries, keys and values, independently.
-            # Then take the layer norm of these inputs, and pass these to the attention module.
-            self.attn(
-                query_input=self.ln1(query_input)
-                + (0.0 if shortformer_pos_embed is None else shortformer_pos_embed),
-                key_input=self.ln1(key_input)
-                + (0.0 if shortformer_pos_embed is None else shortformer_pos_embed),
-                value_input=self.ln1(value_input),
-                past_kv_cache_entry=past_kv_cache_entry,
-                attention_mask=attention_mask,
-            )
-        )  # [batch, pos, d_model]
+        if self.cfg.original_architecture == "Olmo2ForCausalLM":
+            attn_out = (
+                # hook the residual stream states that are used to calculate the
+                # queries, keys and values, independently.
+                # Then take the layer norm of these inputs, and pass these to the attention module.
+                self.attn(
+                    query_input=self.qnorm(query_input)
+                    + (0.0 if shortformer_pos_embed is None else shortformer_pos_embed),
+                    key_input=self.knorm(key_input)
+                    + (0.0 if shortformer_pos_embed is None else shortformer_pos_embed),
+                    value_input=value_input,
+                    past_kv_cache_entry=past_kv_cache_entry,
+                    attention_mask=attention_mask,
+                )
+            )  # [batch, pos, d_model]
+        else:
+            attn_out = (
+                # hook the residual stream states that are used to calculate the
+                # queries, keys and values, independently.
+                # Then take the layer norm of these inputs, and pass these to the attention module.
+                self.attn(
+                    query_input=self.ln1(query_input)
+                    + (0.0 if shortformer_pos_embed is None else shortformer_pos_embed),
+                    key_input=self.ln1(key_input)
+                    + (0.0 if shortformer_pos_embed is None else shortformer_pos_embed),
+                    value_input=self.ln1(value_input),
+                    past_kv_cache_entry=past_kv_cache_entry,
+                    attention_mask=attention_mask,
+                )
+            )  # [batch, pos, d_model]
         if self.cfg.use_normalization_before_and_after:
             # If we use LayerNorm both before and after, then apply the second LN after the layer
             # and before the hook. We do it before the hook so hook_attn_out captures "that which
