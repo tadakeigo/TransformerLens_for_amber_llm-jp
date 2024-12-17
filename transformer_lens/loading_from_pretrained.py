@@ -232,7 +232,8 @@ OFFICIAL_MODEL_NAMES = [
     "allenai/OLMo-2-1124-7B",
     "allenai/OLMo-7B-0724-hf",
     "allenai/OLMo-7B-0424-hf",
-    "allenai/OLMo-7B",
+    # "allenai/OLMo-7B",
+    "keigooooo/OLMo-7B-hf", #convert to hf-format from OLMO-7B
 ]
 """Official model names for models on HuggingFace."""
 
@@ -1654,7 +1655,7 @@ def get_checkpoint_labels(model_name: str, **kwargs):
         return OLMO_0424_CHECKPOINTS, "step"
     elif official_model_name.startswith("allenai/OLMo-7B-0724-hf"):
         return OLMO_0724_CHECKPOINTS, "step"
-    elif official_model_name.startswith("allenai/OLMo-7B"):
+    elif official_model_name.startswith("keigooooo/OLMo-7B-hf"):
         return OLMO_CHECKPOINTS, "step"
     else:
         raise ValueError(f"Model {official_model_name} is not checkpointed.")
@@ -1771,7 +1772,7 @@ def get_pretrained_state_dict(
                     token=huggingface_token,
                     **kwargs,
                 )
-            elif official_model_name.startswith("allenai/OLMo-7B"):
+            elif official_model_name.startswith("keigooooo/OLMo-7B-hf"):
                 hf_model = AutoModelForCausalLM.from_pretrained(
                     official_model_name,
                     revision=f"{cfg.checkpoint_value}",
