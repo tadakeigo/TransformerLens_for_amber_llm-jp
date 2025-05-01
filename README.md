@@ -1,3 +1,29 @@
+> **Repository Purpose**  
+> This repository was created for the research paper *“Triple Phase Transitions: Understanding the Learning Dynamics of Large Language Models from a Neuroscience Perspective”* (arXiv: 2502.20779) (https://arxiv.org/abs/2502.20779).
+> 
+# TransformerLens Integration for Additional LLMs
+
+We have added support for several large-language models (LLMs) in **TransformerLens**.  
+This allows you to inspect every layer’s intermediate activations (hidden states, attention patterns, MLP outputs, etc.) just as you would with any of the library’s built-in models.
+
+## Supported Models
+
+| Model | Checkpoints Available | Notes |
+|-------|----------------------|-------|
+| **Amber** | All released checkpoints | English‐centric model family|
+| **LLM-JP-v3** | All released checkpoints | Japanese‐centric model family |
+| **OLMo** | All released checkpoints | English‐centric model family　|
+
+### Why This Matters
+
+* **Fine-grained analysis** – Hook into any layer or head to measure, visualize, or edit activations.  
+* **Comparative research** – Compare internal representations across different model families or training stages.  
+* **Interpretability tooling** – Leverage the full TransformerLens ecosystem (Activation Patching, Path Patching, Logit Lens, etc.) without extra boilerplate.
+
+---
+
+> **Excerpt from the TransformerLens `README.md`**  
+
 # TransformerLens
 
 <!-- Status Icons -->
