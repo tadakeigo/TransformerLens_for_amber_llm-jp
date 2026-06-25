@@ -14,11 +14,6 @@ This allows you to inspect every layer’s intermediate activations (hidden stat
 | **LLM-JP-v3** | All released checkpoints | Japanese‐centric model family |
 | **OLMo** | All released checkpoints | English‐centric model family　|
 
-### Why This Matters
-
-* **Fine-grained analysis** – Hook into any layer or head to measure, visualize, or edit activations.  
-* **Comparative research** – Compare internal representations across different model families or training stages.  
-* **Interpretability tooling** – Leverage the full TransformerLens ecosystem (Activation Patching, Path Patching, Logit Lens, etc.) without extra boilerplate.
 
 ---
 
